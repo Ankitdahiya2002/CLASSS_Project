@@ -1,7 +1,13 @@
 streamlit
+google-generativeai
 pandas
+openai
+googletrans==4.0.0rc1
+SpeechRecognition
+pydub
+PyPDF2
+openpyxl
 numpy
-sqlalchemy
-psycopg2-binary
-boto3
-requests
+PyMuPDF
+email-validator
+googletrans==4.0.0-rc1
