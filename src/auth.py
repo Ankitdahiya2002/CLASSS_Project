@@ -4,32 +4,36 @@ import uuid
 from datetime import datetime, timedelta
 
 from src.db import (
-    create_user, get_user, is_user_verified, update_reset_token,
+    create_user, get_user, update_reset_token,
     verify_user_credentials, reset_user_password_by_token,
-    block_user, count_registered_users,
-    verify_user_token, reset_password
+    verify_user_token
 )
 from src.email_utils import send_verification_email, send_reset_email
 
-# Set default auth mode
+# ---------------- Default auth mode ----------------
 if "auth_mode" not in st.session_state:
     st.session_state.auth_mode = "login"
 
+# ---------------- Main Auth Page ----------------
 def auth_page():
-    st.title("🔐 OMNISNT AI Assistant - Login")
+    st.title("🔐 OMNISCIENT AI Assistant - Login")
 
-    # Handle reset token in URL using st.query_params (Streamlit v1.35+)
-    reset_token = st.query_params.get("reset_token")
-    if reset_token:
+    # Handle reset token in URL using st.query_params
+    reset_tokens = st.query_params.get("reset_token")
+    if reset_tokens:
         st.session_state.auth_mode = "reset"
-        st.session_state.reset_token = reset_token
+        st.session_state.reset_token = reset_tokens[0]
 
-        # Clean URL by removing query param (not supported directly yet)
-        st.query_params.clear()
+    # Handle verify token in URL using st.query_params
+    verify_tokens = st.query_params.get("verify_token")
+    if verify_tokens:
+        token = verify_tokens[0]
+        if verify_user_token(token):
+            st.sidebar.success("✅ Email verified. Please log in.")
+        else:
+            st.sidebar.error("❌ Invalid or expired verification link.")
 
-    # Determine which page to show
     mode = st.session_state.get("auth_mode", "login")
-
     if mode == "login":
         login_form()
     elif mode == "signup":
@@ -39,8 +43,7 @@ def auth_page():
     elif mode == "reset":
         reset_password_form()
 
-
-# ✅ LOGIN
+# ---------------- Login Form ----------------
 def login_form():
     st.subheader("🔑 Login")
     email = st.text_input("Email")
@@ -50,23 +53,20 @@ def login_form():
         if email and password:
             if verify_user_credentials(email, password):
                 st.session_state.user = email
+                st.session_state.auth_mode = None
                 st.success("✅ Logged in successfully.")
-                st.rerun()
             else:
                 st.error("❌ Invalid email or password.")
         else:
             st.warning("Please enter both email and password.")
 
-    st.text("Don't have an account?")
+    st.markdown("---")
     if st.button("👉 Sign Up"):
         st.session_state.auth_mode = "signup"
-
-    st.text("Forgot password?")
-    if st.button("🔁 Reset Password"):
+    if st.button("🔁 Forgot Password"):
         st.session_state.auth_mode = "forgot"
 
-
-# ✅ SIGN UP
+# ---------------- Signup Form ----------------
 def signup_form():
     st.subheader("📝 Create Account")
     name = st.text_input("Name")
@@ -76,8 +76,9 @@ def signup_form():
 
     if st.button("Sign Up"):
         if name and email and password:
+            hashed = hashlib.sha256(password.encode()).hexdigest()
             token = str(uuid.uuid4())
-            success = create_user(email, password, name, profession, token)
+            success = create_user(email, hashed, name, profession, token)
             if success:
                 send_verification_email(email, token)
                 st.success("✅ Account created! Check your email to verify.")
@@ -90,8 +91,7 @@ def signup_form():
     if st.button("🔙 Back to Login"):
         st.session_state.auth_mode = "login"
 
-
-# ✅ FORGOT PASSWORD
+# ---------------- Forgot Password Form ----------------
 def forgot_password_form():
     st.subheader("🔁 Forgot Password")
     email = st.text_input("Enter your registered email")
@@ -111,12 +111,10 @@ def forgot_password_form():
     if st.button("🔙 Back to Login"):
         st.session_state.auth_mode = "login"
 
-
-# ✅ RESET PASSWORD
+# ---------------- Reset Password Form ----------------
 def reset_password_form():
     st.subheader("🔑 Set New Password")
-
-    token = st.session_state.get("reset_token", None)
+    token = st.session_state.get("reset_token")
     if not token:
         st.error("❌ Invalid or missing reset token.")
         return
@@ -134,8 +132,6 @@ def reset_password_form():
             st.success("✅ Password reset successfully. You can now log in.")
             st.session_state.auth_mode = "login"
             st.session_state.pop("reset_token", None)
-            st.rerun()
-
         else:
             st.error("❌ Invalid or expired token.")
 

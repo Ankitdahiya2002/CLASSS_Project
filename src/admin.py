@@ -1,6 +1,6 @@
 import streamlit as st
 from src.db import (
-    get_all_users, block_user, export_chats_to_csv,
+    get_user, block_user, export_chats_to_csv,
     count_registered_users
 )
 from src.email_utils import send_email
@@ -8,7 +8,7 @@ from src.email_utils import send_email
 
 def show_admin_panel():
     st.set_page_config(page_title="Admin Dashboard", page_icon="👑")
-    st.title("👑 OMNISCENT Admin Dashboard")
+    st.title("👑 Admin Dashboard")
 
     # --- Metrics Section
     col1, col2 = st.columns(2)
@@ -82,7 +82,7 @@ def email_tester():
     test_email = st.text_input("📨 Send Test Email To")
     if st.button("✉️ Send Test Email"):
         if test_email:
-            success = send_email(test_email, "Test Email from OMNISNT", "<p>This is a test email from the admin panel.</p>")
+            success = send_email(test_email, "Test Email from Wingman", "<p>This is a test email from the admin panel.</p>")
             if success:
                 st.success("✅ Test email sent successfully!")
             else:
