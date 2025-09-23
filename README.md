@@ -1,5 +1,5 @@
 
-🕉️ ANTARYAMI - AI Voice Assistant
+ AI Wingman
 A comprehensive AI-powered voice assistant with authentication, chat history, and admin dashboard.
 
 ✨ Features
@@ -65,7 +65,7 @@ bash
 # Start the Streamlit app
 streamlit run app.py
 📋 Project Structure
-antaryami-assistant/
+AI-Wingman/
 ├── app.py                 # Main Streamlit application
 ├── src/
 │   └── helper.py         # AI and utility functions
@@ -160,5 +160,4 @@ Database errors:
 Run python setup_admin.py to reinitialize
 Check file permissions
 Email not sending:
-# OMNISICIENT-AI
-# omnisicent-ai
+# AI-Wingman  
