@@ -1,4 +1,4 @@
-
+Project Link -: https://classsproject.streamlit.app/
  AI Wingman
 A comprehensive AI-powered voice assistant with authentication, chat history, and admin dashboard.
 
@@ -161,3 +161,6 @@ Run python setup_admin.py to reinitialize
 Check file permissions
 Email not sending:
 # AI-Wingman  
+
+
+                                                                                               Copyright 2025 @AnkitDahiya All Rights Reserved.
