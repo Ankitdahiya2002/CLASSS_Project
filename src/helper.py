@@ -38,7 +38,7 @@ def ai_chat_response(prompt: str) -> str:
     if not genai:
         return "Gemini is not properly configured. Check API key or SDK."
     try:
-        model = genai.GenerativeModel("models/gemini-1.5-flash-latest")
+        model = genai.GenerativeModel("models/gemini-1.0")
         response = model.generate_content({
             "parts": [
                 {"text": prompt}
