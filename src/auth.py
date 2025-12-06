@@ -16,7 +16,7 @@ if "auth_mode" not in st.session_state:
 
 # ---------------- Main Auth Page ----------------
 def auth_page():
-    st.title("🔐 OMNISCIENT AI Assistant - Login")
+    st.title("🔐 WINGMAN Assistant ")
 
     # Handle reset token in URL using st.query_params
     reset_tokens = st.query_params.get("reset_token")

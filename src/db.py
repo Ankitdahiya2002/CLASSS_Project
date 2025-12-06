@@ -8,6 +8,7 @@ import io
 
 DB_FILE = "omnisicient.db"
 
+
 # ---------------- Database Connection ----------------
 def get_connection():
     conn = sqlite3.connect(DB_FILE, check_same_thread=False)
@@ -84,20 +85,15 @@ def safe_initialize():
     try:
         create_tables()
     except sqlite3.DatabaseError as e:
-        print(f"[ERROR] Database is corrupted: {e}")
         try:
             backup_path = DB_FILE + ".corrupt.bak"
             os.rename(DB_FILE, backup_path)
-            print(f"[!] Backed up corrupted DB to: {backup_path}")
-        except Exception as backup_err:
-            print(f"[!] Backup failed: {backup_err}")
+        except Exception:
+            pass
         try:
             os.remove(DB_FILE)
-            print("[✓] Corrupted DB deleted. Recreating...")
             create_tables()
-            print("[✓] Database recreated successfully.")
-        except Exception as final_err:
-            print(f"[X] Failed to recreate database: {final_err}")
+        except Exception:
             sys.exit(1)
 
 
@@ -224,25 +220,28 @@ def save_chat(user_email, user_input, ai_response, thread_id=None):
 def get_user_chats(user_email):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM chats WHERE user_email = ? ORDER BY timestamp DESC", (user_email,))
+    cursor.execute("SELECT * FROM chats WHERE user_email = ? ORDER BY timestamp ASC", (user_email,))
     chats = cursor.fetchall()
     conn.close()
     return [dict(chat) for chat in chats]
 
 
+def delete_user_chats(user_email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM chats WHERE user_email = ?", (user_email,))
+    conn.commit()
+    conn.close()
+
+
 def export_chats_to_csv():
-    """
-    Fetch all chat logs and return as a CSV string for admin export.
-    """
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM chats ORDER BY timestamp ASC")
     rows = cursor.fetchall()
     conn.close()
-
     if not rows:
         return ""
-
     df = pd.DataFrame([dict(row) for row in rows])
     csv_buffer = io.StringIO()
     df.to_csv(csv_buffer, index=False)
